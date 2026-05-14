@@ -10,12 +10,12 @@ import {
   Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { searchSubstances } from '../../src/db/queries';
-import type { SubstanceListRow } from '../../src/db/types';
-import { SubstanceCard } from '../../src/components/SubstanceCard';
-import { useDebounced } from '../../src/lib/useDebounced';
-import { useTheme } from '../../src/theme/useTheme';
-import { bg } from '../../src/i18n/bg';
+import { searchSubstances } from '@/src/db/queries';
+import type { SubstanceListRow } from '@/src/db/types';
+import { SubstanceCard } from '@/src/components/SubstanceCard';
+import { useDebounced } from '@/src/lib/useDebounced';
+import { useTheme } from '@/src/theme/useTheme';
+import { bg } from '@/src/i18n/bg';
 
 export default function SearchScreen() {
   const t = useTheme();
@@ -49,13 +49,41 @@ export default function SearchScreen() {
   }, [debouncedQuery]);
 
   const hasQuery = query.trim().length > 0;
-  const empty = !loading && results.length === 0;
+
+  const renderBody = () => {
+    if (loading && results.length === 0) {
+      return (
+        <View style={styles.center}>
+          <ActivityIndicator color={t.accent} />
+        </View>
+      );
+    }
+    if (results.length === 0) {
+      return (
+        <View style={styles.center}>
+          <Text style={{ color: t.textMuted, textAlign: 'center', paddingHorizontal: 24 }}>
+            {hasQuery ? bg.search.noResults : bg.search.emptyHint}
+          </Text>
+        </View>
+      );
+    }
+    return (
+      <FlatList
+        data={results}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={({ item }) => <SubstanceCard item={item} />}
+        contentContainerStyle={styles.list}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      />
+    );
+  };
 
   return (
     <Pressable
       style={[styles.root, { backgroundColor: t.background }]}
       onPress={Keyboard.dismiss}
-      android_disableSound
+      accessible={false}
     >
       <View style={[styles.searchWrap, { backgroundColor: t.surface, borderColor: t.border }]}>
         <Ionicons name="search" color={t.textMuted} size={18} style={{ marginRight: 8 }} />
@@ -68,7 +96,7 @@ export default function SearchScreen() {
           returnKeyType="search"
           autoCorrect={false}
           autoCapitalize="none"
-          onSubmitEditing={() => Keyboard.dismiss()}
+          onSubmitEditing={Keyboard.dismiss}
         />
         {query.length > 0 ? (
           <Ionicons
@@ -88,30 +116,7 @@ export default function SearchScreen() {
         </View>
       ) : null}
 
-      {loading && results.length === 0 ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={t.accent} />
-        </View>
-      ) : empty && hasQuery ? (
-        <View style={styles.center}>
-          <Text style={{ color: t.textMuted }}>{bg.search.noResults}</Text>
-        </View>
-      ) : empty ? (
-        <View style={styles.center}>
-          <Text style={{ color: t.textMuted, textAlign: 'center', paddingHorizontal: 24 }}>
-            {bg.search.emptyHint}
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={results}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => <SubstanceCard item={item} />}
-          contentContainerStyle={styles.list}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-        />
-      )}
+      {renderBody()}
     </Pressable>
   );
 }

@@ -45,9 +45,11 @@ export const bg = {
   },
   browse: {
     title: 'ADR Класове',
+    classLabel: (code: string) => `Клас ${code}`,
   },
   about: {
     title: 'За приложението',
+    importantHeading: '⚠ Важно',
     description:
       'ADR Zone е справочник за първоначални действия при инциденти с превоз на опасни товари. Данните се базират на ADR класификацията.',
     author: 'Автор: Пламен Марков',

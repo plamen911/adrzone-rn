@@ -1,6 +1,6 @@
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useTheme } from '../../src/theme/useTheme';
-import { bg } from '../../src/i18n/bg';
+import { useTheme } from '@/src/theme/useTheme';
+import { bg } from '@/src/i18n/bg';
 
 export default function AboutScreen() {
   const t = useTheme();
@@ -25,7 +25,7 @@ export default function AboutScreen() {
       </View>
 
       <View style={[styles.card, { backgroundColor: t.surface, borderColor: t.border }]}>
-        <Text style={[styles.h2, { color: t.danger }]}>⚠ Важно</Text>
+        <Text style={[styles.h2, { color: t.danger }]}>{bg.about.importantHeading}</Text>
         <Text style={[styles.body, { color: t.text }]}>{bg.about.disclaimer}</Text>
       </View>
     </ScrollView>

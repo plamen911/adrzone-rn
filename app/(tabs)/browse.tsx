@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { listAdrClasses } from '../../src/db/queries';
-import type { AdrClass } from '../../src/db/types';
-import { DANGER_LABEL_IMAGES, parseDangerLabels } from '../../src/lib/dangerLabels';
-import { useTheme } from '../../src/theme/useTheme';
+import { listAdrClasses } from '@/src/db/queries';
+import type { AdrClass } from '@/src/db/types';
+import { DANGER_LABEL_IMAGES, parseDangerLabels } from '@/src/lib/dangerLabels';
+import { useTheme } from '@/src/theme/useTheme';
+import { bg } from '@/src/i18n/bg';
 
 export default function BrowseScreen() {
   const t = useTheme();
@@ -54,7 +55,7 @@ export default function BrowseScreen() {
               )}
               <View style={{ flex: 1 }}>
                 <Text style={[styles.code, { color: t.text }]}>
-                  Клас {item.class_code}
+                  {bg.browse.classLabel(item.class_code)}
                 </Text>
                 <Text style={[styles.descr, { color: t.textMuted }]} numberOfLines={3}>
                   {item.class_descr}
