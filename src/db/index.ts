@@ -3,6 +3,7 @@ import { Asset } from 'expo-asset';
 import { Directory, File, Paths } from 'expo-file-system';
 
 const DB_NAME = 'adrzone.db';
+const HASH_FILE = 'adrzone.db.hash';
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -16,12 +17,19 @@ async function openDb(): Promise<SQLite.SQLiteDatabase> {
   if (!sqliteDir.exists) sqliteDir.create({ intermediates: true });
 
   const target = new File(sqliteDir, DB_NAME);
-  if (!target.exists) {
-    const asset = Asset.fromModule(require('../../assets/db/adrzone.db'));
+  const hashFile = new File(sqliteDir, HASH_FILE);
+
+  const asset = Asset.fromModule(require('../../assets/db/adrzone.db'));
+  const bundledHash = asset.hash ?? '';
+  const installedHash = hashFile.exists ? (await hashFile.text()).trim() : '';
+
+  if (!target.exists || installedHash !== bundledHash) {
     await asset.downloadAsync();
     if (!asset.localUri) throw new Error('Bundled DB asset has no localUri');
+    if (target.exists) target.delete();
     const source = new File(asset.localUri);
     source.copy(target);
+    hashFile.write(bundledHash);
   }
 
   const db = await SQLite.openDatabaseAsync(DB_NAME);
