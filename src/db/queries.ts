@@ -109,6 +109,14 @@ export async function getSubstancesByIds(ids: number[]): Promise<SubstanceListRo
   return ids.map((id) => byId.get(id)).filter((r): r is SubstanceListRow => !!r);
 }
 
+export async function countSubstances(): Promise<number> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ n: number }>(
+    `SELECT COUNT(*) AS n FROM substances`
+  );
+  return row?.n ?? 0;
+}
+
 export async function listAdrClasses(): Promise<AdrClass[]> {
   const db = await getDb();
   return db.getAllAsync<AdrClass>(

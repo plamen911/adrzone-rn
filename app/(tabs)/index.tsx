@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { getSubstancesByIds, searchSubstances } from '@/src/db/queries';
+import { countSubstances, getSubstancesByIds, searchSubstances } from '@/src/db/queries';
 import type { SubstanceListRow } from '@/src/db/types';
 import { SubstanceCard } from '@/src/components/SubstanceCard';
 import { useDebounced } from '@/src/lib/useDebounced';
@@ -34,6 +34,11 @@ export default function SearchScreen() {
   const [loading, setLoading] = useState(false);
   const [favoriteRows, setFavoriteRows] = useState<SubstanceListRow[]>([]);
   const [recentRows, setRecentRows] = useState<SubstanceListRow[]>([]);
+  const [substanceCount, setSubstanceCount] = useState(0);
+
+  useEffect(() => {
+    countSubstances().then(setSubstanceCount);
+  }, []);
 
   const debouncedQuery = useDebounced(query, 220);
 
@@ -98,7 +103,7 @@ export default function SearchScreen() {
         return (
           <View style={styles.center}>
             <Text style={{ color: t.textMuted, textAlign: 'center', paddingHorizontal: 24 }}>
-              {bg.search.emptyHint}
+              {substanceCount > 0 ? bg.search.emptyHint(substanceCount) : ''}
             </Text>
           </View>
         );

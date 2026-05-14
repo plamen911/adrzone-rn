@@ -1,9 +1,11 @@
 import { memo } from 'react';
 import { Image, Pressable, StyleSheet, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import type { SubstanceListRow } from '../db/types';
 import { DANGER_LABEL_IMAGES, parseDangerLabels } from '../lib/dangerLabels';
+import { toggleFavorite, useUserPrefs } from '../lib/userPrefs';
 import { useTheme } from '../theme/useTheme';
 
 type Props = { item: SubstanceListRow };
@@ -11,14 +13,16 @@ type Props = { item: SubstanceListRow };
 function SubstanceCardImpl({ item }: Props) {
   const t = useTheme();
   const router = useRouter();
+  const { favorites } = useUserPrefs();
+  const isFavorite = favorites.includes(item.id);
 
   const onPress = () => {
     Haptics.selectionAsync();
     router.push(`/substance/${item.id}`);
   };
   const onLongPress = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push(`/substance/${item.id}`);
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    toggleFavorite(item.id);
   };
 
   const firstLabel = parseDangerLabels(item.danger_labels)[0];
@@ -46,6 +50,14 @@ function SubstanceCardImpl({ item }: Props) {
         <View style={styles.labelTile}>
           <Image source={labelSource} style={styles.labelImg} resizeMode="contain" />
         </View>
+      ) : null}
+      {isFavorite ? (
+        <Ionicons
+          name="star"
+          size={14}
+          color={t.warning}
+          style={styles.favIndicator}
+        />
       ) : null}
       <View style={styles.body}>
         <Text style={[styles.title, { color: t.text }]} numberOfLines={2}>
@@ -77,6 +89,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     gap: 12,
   },
+  favIndicator: { position: 'absolute', top: 8, right: 10 },
   plate: {
     width: 64,
     height: 48,

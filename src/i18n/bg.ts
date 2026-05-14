@@ -12,7 +12,7 @@ export const bg = {
     clear: 'Изчисти',
     clearQuery: 'Изчисти търсенето',
     clearClassFilter: 'Премахни филтър по клас',
-    emptyHint: 'Започни да пишеш, за да търсиш сред 1818 опасни вещества.',
+    emptyHint: (n: number) => `Започни да пишеш, за да търсиш сред ${n} опасни вещества.`,
     noResults: 'Не са намерени резултати.',
     resultsCount: (n: number) => `${n} ${n === 1 ? 'резултат' : 'резултата'}`,
     favoritesTitle: 'Любими',
