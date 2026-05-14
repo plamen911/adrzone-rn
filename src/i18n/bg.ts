@@ -10,6 +10,8 @@ export const bg = {
     subtitle: 'Търси по име, ОН номер или ИНО код',
     placeholderName: 'Наименование или ОН номер...',
     clear: 'Изчисти',
+    clearQuery: 'Изчисти търсенето',
+    clearClassFilter: 'Премахни филтър по клас',
     emptyHint: 'Започни да пишеш, за да търсиш сред 1818 опасни вещества.',
     noResults: 'Не са намерени резултати.',
     resultsCount: (n: number) => `${n} ${n === 1 ? 'резултат' : 'резултата'}`,
@@ -44,6 +46,8 @@ export const bg = {
     night: 'НОЩЕМ',
     notFound: 'Няма намерени резултати.',
     noDistances: 'Няма данни за дистанции за това вещество.',
+    favoriteAdd: 'Добави в любими',
+    favoriteRemove: 'Премахни от любими',
   },
   browse: {
     title: 'ADR Класове',

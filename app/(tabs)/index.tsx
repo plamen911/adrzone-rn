@@ -173,12 +173,14 @@ export default function SearchScreen() {
           onSubmitEditing={Keyboard.dismiss}
         />
         {query.length > 0 ? (
-          <Ionicons
-            name="close-circle"
-            color={t.textMuted}
-            size={18}
+          <Pressable
             onPress={() => setQuery('')}
-          />
+            hitSlop={10}
+            accessibilityLabel={bg.search.clearQuery}
+            accessibilityRole="button"
+          >
+            <Ionicons name="close-circle" color={t.textMuted} size={18} />
+          </Pressable>
         ) : null}
       </View>
 
@@ -187,6 +189,8 @@ export default function SearchScreen() {
           <Pressable
             onPress={clearAdrClass}
             style={[styles.chip, { backgroundColor: t.surfaceAlt, borderColor: t.border }]}
+            accessibilityLabel={bg.search.clearClassFilter}
+            accessibilityRole="button"
           >
             <Text style={[styles.chipText, { color: t.text }]}>
               {bg.browse.classLabel(adrClass)}

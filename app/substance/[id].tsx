@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import {
   getDistances,
@@ -98,9 +99,13 @@ export default function SubstanceDetailsScreen() {
           title: details.un_number ? `ОН ${details.un_number}` : '',
           headerRight: () => (
             <Pressable
-              onPress={() => toggleFavorite(numericId)}
+              onPress={() => {
+                Haptics.selectionAsync();
+                toggleFavorite(numericId);
+              }}
               hitSlop={12}
-              accessibilityLabel={isFavorite ? 'Премахни от любими' : 'Добави в любими'}
+              accessibilityLabel={isFavorite ? bg.details.favoriteRemove : bg.details.favoriteAdd}
+              accessibilityRole="button"
               style={styles.headerButton}
             >
               <Ionicons

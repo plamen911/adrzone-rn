@@ -12,7 +12,10 @@ function SubstanceCardImpl({ item }: Props) {
   const t = useTheme();
   const router = useRouter();
 
-  const onPress = () => router.push(`/substance/${item.id}`);
+  const onPress = () => {
+    Haptics.selectionAsync();
+    router.push(`/substance/${item.id}`);
+  };
   const onLongPress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push(`/substance/${item.id}`);

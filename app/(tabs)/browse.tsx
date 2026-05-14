@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { listAdrClasses } from '@/src/db/queries';
 import type { AdrClass } from '@/src/db/types';
 import { DANGER_LABEL_IMAGES, parseDangerLabels } from '@/src/lib/dangerLabels';
@@ -37,7 +38,10 @@ export default function BrowseScreen() {
         const labels = parseDangerLabels(item.danger_labels);
         return (
           <Pressable
-            onPress={() => router.push(`/?adrClass=${encodeURIComponent(item.class_code)}`)}
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push(`/?adrClass=${encodeURIComponent(item.class_code)}`);
+            }}
             style={[
               styles.card,
               { backgroundColor: t.surface, borderColor: t.border },
