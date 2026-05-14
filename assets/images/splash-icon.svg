@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect x="192" y="96" width="640" height="832" rx="64"
+        fill="#F5A623" stroke="#0E1116" stroke-width="40"/>
+  <line x1="240" y1="512" x2="784" y2="512"
+        stroke="#0E1116" stroke-width="28"/>
+  <text x="512" y="416" text-anchor="middle"
+        font-family="Helvetica Neue, Arial Black, sans-serif"
+        font-weight="900" font-size="256" fill="#0E1116">33</text>
+  <text x="512" y="720" text-anchor="middle"
+        font-family="Helvetica Neue, Arial Black, sans-serif"
+        font-weight="900" font-size="200" fill="#0E1116">1203</text>
+</svg>
