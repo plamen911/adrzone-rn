@@ -1,50 +1,38 @@
-# Welcome to your Expo app 👋
+# ADR Zone
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A free Bulgarian-language offline reference app for emergency responders
+dealing with the road transport of dangerous goods (ADR).
 
-## Get started
+ADR Zone helps you quickly look up information about ~1818 hazardous
+substances at an incident scene — what they are, what they do, and how
+to keep people safe — without needing internet access.
 
-1. Install dependencies
+## What you can do
 
-   ```bash
-   npm install
-   ```
+- **Search** by substance name, UN number, or HIN code (the upper number
+  on the orange hazard placard on the side of the truck).
+- **Browse** substances by ADR class to see all dangerous goods of a
+  given type.
+- **View an ERI card** — emergency response instructions for each
+  substance.
+- **Check recommended isolation and evacuation distances** for small and
+  large spills, day and night.
+- **Save favorites** for substances you reference often.
+- **Share** a substance summary with a colleague via SMS, email, or any
+  other messaging app.
 
-2. Start the app
+## Who it's for
 
-   ```bash
-   npx expo start
-   ```
+Firefighters, rescuers, drivers, and anyone whose work involves the road
+transport of dangerous goods.
 
-In the output, you'll find options to open the app in a
+## Privacy and offline use
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+ADR Zone runs entirely on your phone. No internet connection is
+required, no account is needed, no registration, and no data ever
+leaves your device.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Important
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+ADR Zone is a reference tool. In a real incident, always follow the
+directions of the competent authorities and the official ERI card.
