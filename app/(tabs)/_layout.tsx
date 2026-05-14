@@ -1,33 +1,50 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../src/theme/useTheme';
+import { bg } from '../../src/i18n/bg';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
+  const t = useTheme();
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarActiveTintColor: t.accent,
+        tabBarInactiveTintColor: t.textMuted,
+        tabBarStyle: {
+          backgroundColor: t.surface,
+          borderTopColor: t.border,
+        },
+        headerStyle: { backgroundColor: t.surface },
+        headerTitleStyle: { color: t.text, fontWeight: '700' },
+        headerTintColor: t.accent,
+        sceneStyle: { backgroundColor: t.background },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: bg.tabs.search,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="browse"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: bg.tabs.browse,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="grid" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="about"
+        options={{
+          title: bg.tabs.about,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="information-circle" color={color} size={size} />
+          ),
         }}
       />
     </Tabs>

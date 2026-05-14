@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "adrzone-rn",
-    "slug": "adrzone-rn",
-    "version": "1.0.0",
+    "name": "ADR Zone",
+    "slug": "adrzone",
+    "version": "2.0.0",
+    "assetBundlePatterns": ["assets/db/**", "assets/danger-labels/**", "assets/images/**"],
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "adrzonern",
@@ -37,6 +38,13 @@
           "dark": {
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      "expo-sqlite",
+      [
+        "expo-asset",
+        {
+          "assets": ["./assets/db/adrzone.db"]
         }
       ]
     ],

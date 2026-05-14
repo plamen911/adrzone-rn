@@ -1,0 +1,89 @@
+import { getDb } from './index';
+import type {
+  AdrClass,
+  DistanceRow,
+  Instruction,
+  SubstanceDetails,
+  SubstanceListRow,
+} from './types';
+
+export type SearchParams = { query: string; limit?: number };
+
+export async function searchSubstances({
+  query,
+  limit = 100,
+}: SearchParams): Promise<SubstanceListRow[]> {
+  const db = await getDb();
+  const where: string[] = [];
+  const params: (string | number)[] = [];
+
+  const q = query.trim();
+  if (q) {
+    const qLower = q.toLowerCase();
+    if (/^\d+$/.test(q)) {
+      where.push(`(s.un_number LIKE ? OR s.substance_lower LIKE ?)`);
+      params.push(`%${q}%`, `%${qLower}%`);
+    } else {
+      where.push(`s.substance_lower LIKE ?`);
+      params.push(`%${qLower}%`);
+    }
+  }
+
+  if (where.length === 0) return [];
+
+  const sql = `
+    SELECT s.*,
+           EXISTS(SELECT 1 FROM distances d WHERE d.un_number = s.un_number) AS has_distance
+    FROM substances s
+    WHERE ${where.join(' AND ')}
+    ORDER BY s.substance, s.un_number
+    LIMIT ?
+  `;
+  params.push(limit);
+  return db.getAllAsync<SubstanceListRow>(sql, params);
+}
+
+export async function getSubstanceDetails(id: number): Promise<SubstanceDetails | null> {
+  const db = await getDb();
+  return db.getFirstAsync<SubstanceDetails>(
+    `SELECT s.*, h.hin_descr AS hin_descr, c.danger_labels AS danger_labels,
+            c.class_descr AS class_descr, g.group_descr AS group_descr,
+            f.code_descr AS code_descr
+     FROM substances s
+     LEFT JOIN hin_codes h ON h.hin_code = s.hin
+     LEFT JOIN adr_classes c ON c.class_code = s.adr_class
+     LEFT JOIN classify_codes f ON f.classify_code = s.classify_code
+     LEFT JOIN packing_groups g ON g.group_code = s.packing_group
+     WHERE s.id = ?`,
+    [id]
+  );
+}
+
+export async function getInstruction(id: number): Promise<Instruction | null> {
+  const db = await getDb();
+  return db.getFirstAsync<Instruction>(
+    `SELECT s.substance AS substance, i.id AS id, i.instruction AS instruction
+     FROM substances s
+     LEFT JOIN instructions i ON i.id = s.instruction_id
+     WHERE s.id = ?`,
+    [id]
+  );
+}
+
+export async function getDistances(substanceId: number): Promise<DistanceRow[]> {
+  const db = await getDb();
+  return db.getAllAsync<DistanceRow>(
+    `SELECT d.*
+     FROM distances d
+     INNER JOIN substances s ON s.un_number = d.un_number
+     WHERE s.id = ?`,
+    [substanceId]
+  );
+}
+
+export async function listAdrClasses(): Promise<AdrClass[]> {
+  const db = await getDb();
+  return db.getAllAsync<AdrClass>(
+    `SELECT * FROM adr_classes ORDER BY is_subclass, class_code`
+  );
+}

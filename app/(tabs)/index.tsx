@@ -1,98 +1,134 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Keyboard,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { searchSubstances } from '../../src/db/queries';
+import type { SubstanceListRow } from '../../src/db/types';
+import { SubstanceCard } from '../../src/components/SubstanceCard';
+import { useDebounced } from '../../src/lib/useDebounced';
+import { useTheme } from '../../src/theme/useTheme';
+import { bg } from '../../src/i18n/bg';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function SearchScreen() {
+  const t = useTheme();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SubstanceListRow[]>([]);
+  const [loading, setLoading] = useState(false);
 
-export default function HomeScreen() {
+  const debouncedQuery = useDebounced(query, 220);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!debouncedQuery.trim()) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    searchSubstances({ query: debouncedQuery })
+      .then((rows) => {
+        if (!cancelled) setResults(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setResults([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQuery]);
+
+  const hasQuery = query.trim().length > 0;
+  const empty = !loading && results.length === 0;
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <Pressable
+      style={[styles.root, { backgroundColor: t.background }]}
+      onPress={Keyboard.dismiss}
+      android_disableSound
+    >
+      <View style={[styles.searchWrap, { backgroundColor: t.surface, borderColor: t.border }]}>
+        <Ionicons name="search" color={t.textMuted} size={18} style={{ marginRight: 8 }} />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder={bg.search.placeholderName}
+          placeholderTextColor={t.textMuted}
+          style={[styles.input, { color: t.text }]}
+          returnKeyType="search"
+          autoCorrect={false}
+          autoCapitalize="none"
+          onSubmitEditing={() => Keyboard.dismiss()}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+        {query.length > 0 ? (
+          <Ionicons
+            name="close-circle"
+            color={t.textMuted}
+            size={18}
+            onPress={() => setQuery('')}
+          />
+        ) : null}
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      {hasQuery ? (
+        <View style={styles.metaRow}>
+          <Text style={{ color: t.textMuted, fontSize: 12 }}>
+            {loading ? '...' : bg.search.resultsCount(results.length)}
+          </Text>
+        </View>
+      ) : null}
+
+      {loading && results.length === 0 ? (
+        <View style={styles.center}>
+          <ActivityIndicator color={t.accent} />
+        </View>
+      ) : empty && hasQuery ? (
+        <View style={styles.center}>
+          <Text style={{ color: t.textMuted }}>{bg.search.noResults}</Text>
+        </View>
+      ) : empty ? (
+        <View style={styles.center}>
+          <Text style={{ color: t.textMuted, textAlign: 'center', paddingHorizontal: 24 }}>
+            {bg.search.emptyHint}
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={results}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => <SubstanceCard item={item} />}
+          contentContainerStyle={styles.list}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        />
+      )}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  root: { flex: 1 },
+  searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    margin: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  input: { flex: 1, fontSize: 15, paddingVertical: 0 },
+  metaRow: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 6 },
+  list: { paddingHorizontal: 12, paddingBottom: 24 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
 });
