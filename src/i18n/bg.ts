@@ -48,6 +48,8 @@ export const bg = {
     noDistances: 'Няма данни за дистанции за това вещество.',
     favoriteAdd: 'Добави в любими',
     favoriteRemove: 'Премахни от любими',
+    share: 'Сподели',
+    shareTitle: 'ADR Zone',
   },
   browse: {
     title: 'ADR Класове',

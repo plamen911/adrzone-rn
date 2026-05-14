@@ -4,6 +4,7 @@ import {
   Image,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -28,6 +29,21 @@ import { DANGER_LABEL_IMAGES, parseDangerLabels } from '@/src/lib/dangerLabels';
 import { recordRecent, toggleFavorite, useUserPrefs } from '@/src/lib/userPrefs';
 import { useTheme } from '@/src/theme/useTheme';
 import { bg } from '@/src/i18n/bg';
+
+function buildShareText(d: SubstanceDetails): string {
+  const codes: string[] = [];
+  if (d.un_number) codes.push(`ОН ${d.un_number}`);
+  if (d.hin) codes.push(`ИНО ${d.hin}`);
+  if (d.eric) codes.push(`ERI ${d.eric}`);
+  const lines: string[] = [d.substance];
+  if (codes.length) lines.push(codes.join(' · '));
+  if (d.adr_class) {
+    const tail = d.class_descr ? ` — ${d.class_descr}` : '';
+    lines.push(`ADR ${d.adr_class}${tail}`);
+  }
+  if (d.hin_descr) lines.push(d.hin_descr);
+  return lines.join('\n');
+}
 
 export default function SubstanceDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -92,29 +108,45 @@ export default function SubstanceDetailsScreen() {
 
   const labels = parseDangerLabels(details.danger_labels);
 
+  const onShare = () => {
+    Haptics.selectionAsync();
+    Share.share({ title: bg.details.shareTitle, message: buildShareText(details) });
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Stack.Screen
         options={{
           title: details.un_number ? `ОН ${details.un_number}` : '',
           headerRight: () => (
-            <Pressable
-              onPress={() => {
-                Haptics.selectionAsync();
-                toggleFavorite(numericId);
-              }}
-              hitSlop={12}
-              accessibilityLabel={isFavorite ? bg.details.favoriteRemove : bg.details.favoriteAdd}
-              accessibilityRole="button"
-              style={styles.headerButton}
-            >
-              <Ionicons
-                name={isFavorite ? 'star' : 'star-outline'}
-                size={22}
-                color={isFavorite ? t.warning : t.accent}
-                style={{ marginTop: -2 }}
-              />
-            </Pressable>
+            <View style={styles.headerButtonRow}>
+              <Pressable
+                onPress={onShare}
+                hitSlop={12}
+                accessibilityLabel={bg.details.share}
+                accessibilityRole="button"
+                style={styles.headerButton}
+              >
+                <Ionicons name="share-outline" size={22} color={t.accent} />
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  toggleFavorite(numericId);
+                }}
+                hitSlop={12}
+                accessibilityLabel={isFavorite ? bg.details.favoriteRemove : bg.details.favoriteAdd}
+                accessibilityRole="button"
+                style={styles.headerButton}
+              >
+                <Ionicons
+                  name={isFavorite ? 'star' : 'star-outline'}
+                  size={22}
+                  color={isFavorite ? t.warning : t.accent}
+                  style={{ marginTop: -2 }}
+                />
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -290,6 +322,7 @@ function SpillBlock({
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   headerButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerButtonRow: { flexDirection: 'row', alignItems: 'center' },
   header: {
     paddingHorizontal: 16,
     paddingTop: 14,
