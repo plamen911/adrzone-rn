@@ -1,8 +1,9 @@
 import { memo } from 'react';
-import { Pressable, StyleSheet, View, Text } from 'react-native';
+import { Image, Pressable, StyleSheet, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import type { SubstanceListRow } from '../db/types';
+import { DANGER_LABEL_IMAGES, parseDangerLabels } from '../lib/dangerLabels';
 import { useTheme } from '../theme/useTheme';
 
 type Props = { item: SubstanceListRow };
@@ -16,6 +17,9 @@ function SubstanceCardImpl({ item }: Props) {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push(`/substance/${item.id}`);
   };
+
+  const firstLabel = parseDangerLabels(item.danger_labels)[0];
+  const labelSource = firstLabel ? DANGER_LABEL_IMAGES[firstLabel] : undefined;
 
   return (
     <Pressable
@@ -35,6 +39,11 @@ function SubstanceCardImpl({ item }: Props) {
         <View style={[styles.plateDivider, { backgroundColor: '#0E1116' }]} />
         <Text style={styles.plateUn}>{item.un_number || '–'}</Text>
       </View>
+      {labelSource ? (
+        <View style={styles.labelTile}>
+          <Image source={labelSource} style={styles.labelImg} resizeMode="contain" />
+        </View>
+      ) : null}
       <View style={styles.body}>
         <Text style={[styles.title, { color: t.text }]} numberOfLines={2}>
           {item.substance}
@@ -78,6 +87,8 @@ const styles = StyleSheet.create({
   plateDivider: { width: '90%', height: 2 },
   plateHin: { fontSize: 13, fontWeight: '700', color: '#0E1116' },
   plateUn: { fontSize: 13, fontWeight: '700', color: '#0E1116' },
+  labelTile: { backgroundColor: '#FFFFFF', borderRadius: 6, padding: 2 },
+  labelImg: { width: 40, height: 40 },
   body: { flex: 1 },
   title: { fontSize: 15, fontWeight: '600', marginBottom: 2 },
   meta: { fontSize: 12 },

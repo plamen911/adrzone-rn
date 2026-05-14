@@ -21,9 +21,12 @@ export async function searchSubstances({
   const q = query.trim();
   if (q) {
     const qLower = q.toLowerCase();
-    if (/^\d+$/.test(q)) {
-      where.push(`(s.un_number LIKE ? OR s.substance_lower LIKE ?)`);
-      params.push(`%${q}%`, `%${qLower}%`);
+    const qUpper = q.toUpperCase();
+    if (/^[Xx]?\d+$/.test(q)) {
+      where.push(
+        `(s.hin LIKE ? OR s.un_number LIKE ? OR s.substance_lower LIKE ?)`
+      );
+      params.push(`%${qUpper}%`, `%${q}%`, `%${qLower}%`);
     } else {
       where.push(`s.substance_lower LIKE ?`);
       params.push(`%${qLower}%`);
@@ -39,8 +42,10 @@ export async function searchSubstances({
 
   const sql = `
     SELECT s.*,
+           c.danger_labels AS danger_labels,
            EXISTS(SELECT 1 FROM distances d WHERE d.un_number = s.un_number) AS has_distance
     FROM substances s
+    LEFT JOIN adr_classes c ON c.class_code = s.adr_class
     WHERE ${where.join(' AND ')}
     ORDER BY s.substance, s.un_number
     LIMIT ?

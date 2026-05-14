@@ -14,6 +14,7 @@ export type Substance = {
 
 export type SubstanceListRow = Substance & {
   has_distance: 0 | 1;
+  danger_labels: string | null;
 };
 
 export type SubstanceDetails = Substance & {
