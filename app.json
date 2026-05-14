@@ -3,14 +3,19 @@
     "name": "ADR Zone",
     "slug": "adrzone",
     "version": "2.0.0",
-    "assetBundlePatterns": ["assets/db/**", "assets/danger-labels/**", "assets/images/**"],
+    "assetBundlePatterns": [
+      "assets/db/**",
+      "assets/danger-labels/**",
+      "assets/images/**"
+    ],
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "adrzonern",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.adrzone"
     },
     "android": {
       "adaptiveIcon": {
@@ -44,7 +49,9 @@
       [
         "expo-asset",
         {
-          "assets": ["./assets/db/adrzone.db"]
+          "assets": [
+            "./assets/db/adrzone.db"
+          ]
         }
       ]
     ],
