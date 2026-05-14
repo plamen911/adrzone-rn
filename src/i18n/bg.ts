@@ -13,6 +13,8 @@ export const bg = {
     emptyHint: 'Започни да пишеш, за да търсиш сред 1818 опасни вещества.',
     noResults: 'Не са намерени резултати.',
     resultsCount: (n: number) => `${n} ${n === 1 ? 'резултат' : 'резултата'}`,
+    favoritesTitle: 'Любими',
+    recentsTitle: 'Скоро прегледани',
   },
   details: {
     sections: {

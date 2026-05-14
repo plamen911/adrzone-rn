@@ -92,6 +92,23 @@ export async function getDistances(substanceId: number): Promise<DistanceRow[]> 
   );
 }
 
+export async function getSubstancesByIds(ids: number[]): Promise<SubstanceListRow[]> {
+  if (ids.length === 0) return [];
+  const db = await getDb();
+  const placeholders = ids.map(() => '?').join(',');
+  const rows = await db.getAllAsync<SubstanceListRow>(
+    `SELECT s.*,
+            c.danger_labels AS danger_labels,
+            EXISTS(SELECT 1 FROM distances d WHERE d.un_number = s.un_number) AS has_distance
+     FROM substances s
+     LEFT JOIN adr_classes c ON c.class_code = s.adr_class
+     WHERE s.id IN (${placeholders})`,
+    ids
+  );
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  return ids.map((id) => byId.get(id)).filter((r): r is SubstanceListRow => !!r);
+}
+
 export async function listAdrClasses(): Promise<AdrClass[]> {
   const db = await getDb();
   return db.getAllAsync<AdrClass>(

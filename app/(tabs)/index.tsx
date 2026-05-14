@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -11,10 +12,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { searchSubstances } from '@/src/db/queries';
+import { getSubstancesByIds, searchSubstances } from '@/src/db/queries';
 import type { SubstanceListRow } from '@/src/db/types';
 import { SubstanceCard } from '@/src/components/SubstanceCard';
 import { useDebounced } from '@/src/lib/useDebounced';
+import { useUserPrefs } from '@/src/lib/userPrefs';
 import { useTheme } from '@/src/theme/useTheme';
 import { bg } from '@/src/i18n/bg';
 
@@ -26,9 +28,12 @@ export default function SearchScreen() {
     typeof params.adrClass === 'string' && params.adrClass.length > 0
       ? params.adrClass
       : undefined;
+  const prefs = useUserPrefs();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SubstanceListRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [favoriteRows, setFavoriteRows] = useState<SubstanceListRow[]>([]);
+  const [recentRows, setRecentRows] = useState<SubstanceListRow[]>([]);
 
   const debouncedQuery = useDebounced(query, 220);
 
@@ -55,6 +60,27 @@ export default function SearchScreen() {
     };
   }, [debouncedQuery, adrClass]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const ids = Array.from(new Set([...prefs.favorites, ...prefs.recents]));
+    if (ids.length === 0) {
+      setFavoriteRows([]);
+      setRecentRows([]);
+      return;
+    }
+    getSubstancesByIds(ids).then((rows) => {
+      if (cancelled) return;
+      const byId = new Map(rows.map((r) => [r.id, r]));
+      const pick = (list: number[]) =>
+        list.map((id) => byId.get(id)).filter((r): r is SubstanceListRow => !!r);
+      setFavoriteRows(pick(prefs.favorites));
+      setRecentRows(pick(prefs.recents));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [prefs]);
+
   const hasQuery = query.trim().length > 0;
   const hasFilter = hasQuery || !!adrClass;
   const clearAdrClass = () => router.setParams({ adrClass: '' });
@@ -67,11 +93,50 @@ export default function SearchScreen() {
         </View>
       );
     }
+    if (!hasFilter) {
+      if (favoriteRows.length === 0 && recentRows.length === 0) {
+        return (
+          <View style={styles.center}>
+            <Text style={{ color: t.textMuted, textAlign: 'center', paddingHorizontal: 24 }}>
+              {bg.search.emptyHint}
+            </Text>
+          </View>
+        );
+      }
+      return (
+        <ScrollView
+          contentContainerStyle={styles.list}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          {favoriteRows.length > 0 ? (
+            <>
+              <Text style={[styles.sectionHeader, { color: t.textMuted }]}>
+                {bg.search.favoritesTitle}
+              </Text>
+              {favoriteRows.map((item) => (
+                <SubstanceCard key={item.id} item={item} />
+              ))}
+            </>
+          ) : null}
+          {recentRows.length > 0 ? (
+            <>
+              <Text style={[styles.sectionHeader, { color: t.textMuted }]}>
+                {bg.search.recentsTitle}
+              </Text>
+              {recentRows.map((item) => (
+                <SubstanceCard key={`r-${item.id}`} item={item} />
+              ))}
+            </>
+          ) : null}
+        </ScrollView>
+      );
+    }
     if (results.length === 0) {
       return (
         <View style={styles.center}>
           <Text style={{ color: t.textMuted, textAlign: 'center', paddingHorizontal: 24 }}>
-            {hasFilter ? bg.search.noResults : bg.search.emptyHint}
+            {bg.search.noResults}
           </Text>
         </View>
       );
@@ -167,6 +232,15 @@ const styles = StyleSheet.create({
   },
   chipText: { fontSize: 12, fontWeight: '600' },
   metaRow: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 6 },
+  sectionHeader: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    paddingHorizontal: 4,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
   list: { paddingHorizontal: 12, paddingBottom: 24 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
 });

@@ -2,33 +2,38 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import {
   getDistances,
   getInstruction,
   getSubstanceDetails,
-} from '../../src/db/queries';
+} from '@/src/db/queries';
 import type {
   DistanceRow,
   Instruction,
   SubstanceDetails,
-} from '../../src/db/types';
-import { Field } from '../../src/components/Field';
-import { HtmlView } from '../../src/components/HtmlView';
-import { DANGER_LABEL_IMAGES, parseDangerLabels } from '../../src/lib/dangerLabels';
-import { useTheme } from '../../src/theme/useTheme';
-import { bg } from '../../src/i18n/bg';
+} from '@/src/db/types';
+import { Field } from '@/src/components/Field';
+import { HtmlView } from '@/src/components/HtmlView';
+import { DANGER_LABEL_IMAGES, parseDangerLabels } from '@/src/lib/dangerLabels';
+import { recordRecent, toggleFavorite, useUserPrefs } from '@/src/lib/userPrefs';
+import { useTheme } from '@/src/theme/useTheme';
+import { bg } from '@/src/i18n/bg';
 
 export default function SubstanceDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const t = useTheme();
   const numericId = Number(id);
+  const prefs = useUserPrefs();
+  const isFavorite = Number.isFinite(numericId) && prefs.favorites.includes(numericId);
 
   const [details, setDetails] = useState<SubstanceDetails | null>(null);
   const [instr, setInstr] = useState<Instruction | null>(null);
@@ -50,6 +55,7 @@ export default function SubstanceDetailsScreen() {
         setDetails(d);
         setInstr(i);
         setDistances(dist);
+        if (d) recordRecent(numericId);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -87,7 +93,26 @@ export default function SubstanceDetailsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
-      <Stack.Screen options={{ title: details.un_number ? `ОН ${details.un_number}` : '' }} />
+      <Stack.Screen
+        options={{
+          title: details.un_number ? `ОН ${details.un_number}` : '',
+          headerRight: () => (
+            <Pressable
+              onPress={() => toggleFavorite(numericId)}
+              hitSlop={12}
+              accessibilityLabel={isFavorite ? 'Премахни от любими' : 'Добави в любими'}
+              style={styles.headerButton}
+            >
+              <Ionicons
+                name={isFavorite ? 'star' : 'star-outline'}
+                size={22}
+                color={isFavorite ? t.warning : t.accent}
+                style={{ marginTop: -2 }}
+              />
+            </Pressable>
+          ),
+        }}
+      />
 
       <View style={[styles.header, { backgroundColor: t.surface, borderBottomColor: t.border }]}>
         <Text style={[styles.title, { color: t.text }]} numberOfLines={3}>
@@ -259,6 +284,7 @@ function SpillBlock({
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  headerButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   header: {
     paddingHorizontal: 16,
     paddingTop: 14,
