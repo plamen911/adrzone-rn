@@ -60,9 +60,14 @@ export default function BrowseScreen() {
                 <View style={[styles.thumb, { backgroundColor: t.surfaceAlt }]} />
               )}
               <View style={{ flex: 1 }}>
-                <Text style={[styles.code, { color: t.text }]}>
-                  {bg.browse.classLabel(item.class_code)}
-                </Text>
+                <View style={styles.codeRow}>
+                  <Text style={[styles.code, { color: t.text }]}>
+                    {bg.browse.classLabel(item.class_code)}
+                  </Text>
+                  <Text style={[styles.count, { color: t.textMuted }]}>
+                    {bg.browse.substanceCount(item.substance_count)}
+                  </Text>
+                </View>
                 <Text style={[styles.descr, { color: t.textMuted }]} numberOfLines={3}>
                   {item.class_descr}
                 </Text>
@@ -87,6 +92,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12, alignItems: 'center' },
   thumb: { width: 56, height: 56 },
   thumbTile: { backgroundColor: '#FFFFFF', borderRadius: 6, padding: 3 },
-  code: { fontSize: 15, fontWeight: '700', marginBottom: 2 },
+  codeRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 2 },
+  code: { fontSize: 15, fontWeight: '700' },
+  count: { fontSize: 12, fontWeight: '500' },
   descr: { fontSize: 13 },
 });

@@ -50,4 +50,5 @@ export type AdrClass = {
   class_descr: string;
   is_subclass: 0 | 1;
   danger_labels: string;
+  substance_count: number;
 };

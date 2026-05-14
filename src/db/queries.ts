@@ -120,6 +120,9 @@ export async function countSubstances(): Promise<number> {
 export async function listAdrClasses(): Promise<AdrClass[]> {
   const db = await getDb();
   return db.getAllAsync<AdrClass>(
-    `SELECT * FROM adr_classes ORDER BY is_subclass, class_code`
+    `SELECT c.*,
+            (SELECT COUNT(*) FROM substances s WHERE s.adr_class = c.class_code) AS substance_count
+     FROM adr_classes c
+     ORDER BY c.is_subclass, c.class_code`
   );
 }

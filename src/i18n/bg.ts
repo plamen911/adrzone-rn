@@ -55,6 +55,7 @@ export const bg = {
   browse: {
     title: 'ADR Класове',
     classLabel: (code: string) => `Клас ${code}`,
+    substanceCount: (n: number) => `${n} ${n === 1 ? 'вещество' : 'вещества'}`,
   },
   about: {
     title: 'За приложението',
