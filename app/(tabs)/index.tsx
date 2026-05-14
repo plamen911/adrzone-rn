@@ -16,7 +16,7 @@ import { countSubstances, getSubstancesByIds, searchSubstances } from '@/src/db/
 import type { SubstanceListRow } from '@/src/db/types';
 import { SubstanceCard } from '@/src/components/SubstanceCard';
 import { useDebounced } from '@/src/lib/useDebounced';
-import { useUserPrefs } from '@/src/lib/userPrefs';
+import { clearRecents, useUserPrefs } from '@/src/lib/userPrefs';
 import { useTheme } from '@/src/theme/useTheme';
 import { bg } from '@/src/i18n/bg';
 
@@ -126,9 +126,19 @@ export default function SearchScreen() {
           ) : null}
           {recentRows.length > 0 ? (
             <>
-              <Text style={[styles.sectionHeader, { color: t.textMuted }]}>
-                {bg.search.recentsTitle}
-              </Text>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={[styles.sectionHeader, { color: t.textMuted }]}>
+                  {bg.search.recentsTitle}
+                </Text>
+                <Pressable
+                  onPress={() => clearRecents()}
+                  hitSlop={10}
+                  accessibilityLabel={bg.search.clearRecents}
+                  accessibilityRole="button"
+                >
+                  <Ionicons name="trash-outline" size={16} color={t.textMuted} />
+                </Pressable>
+              </View>
               {recentRows.map((item) => (
                 <SubstanceCard key={`r-${item.id}`} item={item} />
               ))}
@@ -249,6 +259,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingTop: 8,
     paddingBottom: 4,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: 4,
   },
   list: { paddingHorizontal: 12, paddingBottom: 24 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },

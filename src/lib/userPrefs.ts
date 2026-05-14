@@ -76,6 +76,12 @@ export async function recordRecent(id: number): Promise<void> {
   });
 }
 
+export async function clearRecents(): Promise<void> {
+  const prefs = await load();
+  if (prefs.recents.length === 0) return;
+  persist({ ...prefs, recents: [] });
+}
+
 export function useUserPrefs(): UserPrefs {
   const [prefs, setPrefs] = useState<UserPrefs>(cache ?? EMPTY);
 

@@ -17,6 +17,7 @@ export const bg = {
     resultsCount: (n: number) => `${n} ${n === 1 ? 'резултат' : 'резултата'}`,
     favoritesTitle: 'Любими',
     recentsTitle: 'Скоро прегледани',
+    clearRecents: 'Изчисти историята',
   },
   details: {
     sections: {
