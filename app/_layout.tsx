@@ -15,6 +15,7 @@ export default function RootLayout() {
           headerStyle: { backgroundColor: t.surface },
           headerTitleStyle: { color: t.text, fontWeight: '600' },
           headerTintColor: t.accent,
+          headerBackButtonDisplayMode: 'minimal',
           contentStyle: { backgroundColor: t.background },
         }}
       >
