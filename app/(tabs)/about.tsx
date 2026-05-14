@@ -1,4 +1,5 @@
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Constants from 'expo-constants';
 import { useTheme } from '@/src/theme/useTheme';
 import { bg } from '@/src/i18n/bg';
 
@@ -21,7 +22,9 @@ export default function AboutScreen() {
         >
           {bg.about.email}
         </Text>
-        <Text style={[styles.meta, { color: t.textMuted }]}>{bg.about.version}</Text>
+        <Text style={[styles.meta, { color: t.textMuted }]}>
+          {bg.about.version(Constants.expoConfig?.version ?? '?')}
+        </Text>
       </View>
 
       <View style={[styles.card, { backgroundColor: t.surface, borderColor: t.border }]}>
