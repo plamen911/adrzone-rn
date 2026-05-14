@@ -7,10 +7,11 @@ import type {
   SubstanceListRow,
 } from './types';
 
-export type SearchParams = { query: string; limit?: number };
+export type SearchParams = { query: string; adrClass?: string; limit?: number };
 
 export async function searchSubstances({
   query,
+  adrClass,
   limit = 100,
 }: SearchParams): Promise<SubstanceListRow[]> {
   const db = await getDb();
@@ -27,6 +28,11 @@ export async function searchSubstances({
       where.push(`s.substance_lower LIKE ?`);
       params.push(`%${qLower}%`);
     }
+  }
+
+  if (adrClass) {
+    where.push(`s.adr_class = ?`);
+    params.push(adrClass);
   }
 
   if (where.length === 0) return [];

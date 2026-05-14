@@ -45,11 +45,13 @@ export default function BrowseScreen() {
           >
             <View style={styles.row}>
               {labels.length > 0 && DANGER_LABEL_IMAGES[labels[0]] ? (
-                <Image
-                  source={DANGER_LABEL_IMAGES[labels[0]]}
-                  style={styles.thumb}
-                  resizeMode="contain"
-                />
+                <View style={styles.thumbTile}>
+                  <Image
+                    source={DANGER_LABEL_IMAGES[labels[0]]}
+                    style={styles.thumb}
+                    resizeMode="contain"
+                  />
+                </View>
               ) : (
                 <View style={[styles.thumb, { backgroundColor: t.surfaceAlt }]} />
               )}
@@ -80,6 +82,7 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', gap: 12, alignItems: 'center' },
   thumb: { width: 56, height: 56 },
+  thumbTile: { backgroundColor: '#FFFFFF', borderRadius: 6, padding: 3 },
   code: { fontSize: 15, fontWeight: '700', marginBottom: 2 },
   descr: { fontSize: 13 },
 });

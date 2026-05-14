@@ -103,12 +103,13 @@ export default function SubstanceDetailsScreen() {
             <View style={styles.labelsRow}>
               {labels.map((lf) =>
                 DANGER_LABEL_IMAGES[lf] ? (
-                  <Image
-                    key={lf}
-                    source={DANGER_LABEL_IMAGES[lf]}
-                    style={styles.labelImg}
-                    resizeMode="contain"
-                  />
+                  <View key={lf} style={styles.labelTile}>
+                    <Image
+                      source={DANGER_LABEL_IMAGES[lf]}
+                      style={styles.labelImg}
+                      resizeMode="contain"
+                    />
+                  </View>
                 ) : null
               )}
             </View>
@@ -279,6 +280,7 @@ const styles = StyleSheet.create({
   plateDivider: { width: '90%', height: 2, backgroundColor: '#0E1116' },
   plateText: { fontSize: 13, fontWeight: '700', color: '#0E1116' },
   labelsRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', flex: 1 },
+  labelTile: { backgroundColor: '#FFFFFF', borderRadius: 6, padding: 3 },
   labelImg: { width: 44, height: 44 },
   segmentWrap: { marginTop: 4 },
   body: { padding: 12 },
