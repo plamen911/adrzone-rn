@@ -22,6 +22,8 @@
       }
     },
     "android": {
+      "package": "com.plamenmarkov.adrzone",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#0E1116",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
