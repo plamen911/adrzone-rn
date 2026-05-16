@@ -12,6 +12,7 @@ import {
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import * as StoreReview from 'expo-store-review';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import {
   getDistances,
@@ -26,7 +27,14 @@ import type {
 import { Field } from '@/src/components/Field';
 import { HtmlView } from '@/src/components/HtmlView';
 import { DANGER_LABEL_IMAGES, parseDangerLabels } from '@/src/lib/dangerLabels';
-import { recordRecent, toggleFavorite, useUserPrefs } from '@/src/lib/userPrefs';
+import {
+  recordDetailOpen,
+  recordRecent,
+  toggleFavorite,
+  tryClaimReviewPrompt,
+  useUserPrefs,
+} from '@/src/lib/userPrefs';
+import { APP_STORE_URL } from '@/src/lib/constants';
 import { useTheme } from '@/src/theme/useTheme';
 import { bg } from '@/src/i18n/bg';
 
@@ -42,7 +50,19 @@ function buildShareText(d: SubstanceDetails): string {
     lines.push(`ADR ${d.adr_class}${tail}`);
   }
   if (d.hin_descr) lines.push(d.hin_descr);
+  lines.push('');
+  lines.push(`${bg.details.shareTagline}\n${APP_STORE_URL}`);
   return lines.join('\n');
+}
+
+async function maybePromptForReview() {
+  if (!(await tryClaimReviewPrompt())) return;
+  if (!(await StoreReview.isAvailableAsync())) return;
+  try {
+    await StoreReview.requestReview();
+  } catch {
+    // System sheet failures are silent — Apple rate-limits separately.
+  }
 }
 
 export default function SubstanceDetailsScreen() {
@@ -72,7 +92,10 @@ export default function SubstanceDetailsScreen() {
         setDetails(d);
         setInstr(i);
         setDistances(dist);
-        if (d) recordRecent(numericId);
+        if (d) {
+          recordRecent(numericId);
+          recordDetailOpen().then(() => maybePromptForReview());
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

@@ -51,6 +51,7 @@ export const bg = {
     favoriteRemove: 'Премахни от любими',
     share: 'Сподели',
     shareTitle: 'ADR Zone',
+    shareTagline: 'Виж пълните данни в ADR Zone:',
   },
   browse: {
     title: 'ADR Класове',
@@ -67,5 +68,6 @@ export const bg = {
     version: (v: string) => `Версия ${v}`,
     disclaimer:
       'Това приложение е справочно средство. При реален инцидент винаги следвайте указанията на компетентните органи и официалната ERI-Карта.',
+    rate: 'Оцени ADR Zone в App Store',
   },
 } as const;
