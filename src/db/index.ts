@@ -1,6 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 import { Asset } from 'expo-asset';
 import { Directory, File, Paths } from 'expo-file-system';
+import { lowerCyrillicSafe } from './caseFold';
 
 const DB_NAME = 'adrzone.db';
 const HASH_FILE = 'adrzone.db.hash';
@@ -37,8 +38,10 @@ async function openDb(): Promise<SQLite.SQLiteDatabase> {
   return db;
 }
 
-// SQLite's LOWER() only handles ASCII, so we maintain a JS-lowercased
-// column (Unicode-aware) for case-insensitive search over Cyrillic names.
+// The bundled DB already has substance_lower populated at build time
+// (scripts/add-substance-lower.mjs). This runs as a safety net only — if a
+// legacy device has an old DB cached, it backfills missing rows using
+// lowerCyrillicSafe, which works regardless of Hermes Cyrillic support.
 async function ensureSearchIndex(db: SQLite.SQLiteDatabase): Promise<void> {
   const cols = await db.getAllAsync<{ name: string }>(
     `PRAGMA table_info(substances)`
@@ -56,7 +59,7 @@ async function ensureSearchIndex(db: SQLite.SQLiteDatabase): Promise<void> {
     for (const row of missing) {
       await db.runAsync(
         `UPDATE substances SET substance_lower = ? WHERE id = ?`,
-        [(row.substance ?? '').toLowerCase(), row.id]
+        [lowerCyrillicSafe(row.substance ?? ''), row.id]
       );
     }
   });

@@ -1,4 +1,5 @@
 import { getDb } from './index';
+import { lowerCyrillicSafe } from './caseFold';
 import type {
   AdrClass,
   DistanceRow,
@@ -16,26 +17,41 @@ export async function searchSubstances({
 }: SearchParams): Promise<SubstanceListRow[]> {
   const db = await getDb();
   const where: string[] = [];
-  const params: (string | number)[] = [];
+  const selectParams: (string | number)[] = [];
+  const whereParams: (string | number)[] = [];
 
   const q = query.trim();
+  const qLower = q ? lowerCyrillicSafe(q) : '';
+  const qUpper = q ? q.toUpperCase() : '';
+
+  // Relevance rank: exact name match (0) → name prefix (1) → exact UN/HIN (2) → substring (3).
+  // Ensures pure "ХЛОР" beats compounds like "ХЛОРИД" within the LIMIT window.
+  let rankSelect = '0 AS rank';
   if (q) {
-    const qLower = q.toLowerCase();
-    const qUpper = q.toUpperCase();
+    rankSelect = `CASE
+      WHEN s.substance_lower = ? THEN 0
+      WHEN s.substance_lower LIKE ? THEN 1
+      WHEN s.un_number = ? OR s.hin = ? THEN 2
+      ELSE 3
+    END AS rank`;
+    selectParams.push(qLower, `${qLower}%`, q, qUpper);
+  }
+
+  if (q) {
     if (/^[Xx]?\d+$/.test(q)) {
       where.push(
         `(s.hin LIKE ? OR s.un_number LIKE ? OR s.substance_lower LIKE ?)`
       );
-      params.push(`%${qUpper}%`, `%${q}%`, `%${qLower}%`);
+      whereParams.push(`%${qUpper}%`, `%${q}%`, `%${qLower}%`);
     } else {
       where.push(`s.substance_lower LIKE ?`);
-      params.push(`%${qLower}%`);
+      whereParams.push(`%${qLower}%`);
     }
   }
 
   if (adrClass) {
     where.push(`s.adr_class = ?`);
-    params.push(adrClass);
+    whereParams.push(adrClass);
   }
 
   if (where.length === 0) return [];
@@ -43,15 +59,15 @@ export async function searchSubstances({
   const sql = `
     SELECT s.*,
            c.danger_labels AS danger_labels,
-           EXISTS(SELECT 1 FROM distances d WHERE d.un_number = s.un_number) AS has_distance
+           EXISTS(SELECT 1 FROM distances d WHERE d.un_number = s.un_number) AS has_distance,
+           ${rankSelect}
     FROM substances s
     LEFT JOIN adr_classes c ON c.class_code = s.adr_class
     WHERE ${where.join(' AND ')}
-    ORDER BY s.substance, s.un_number
+    ORDER BY rank, s.substance, s.un_number
     LIMIT ?
   `;
-  params.push(limit);
-  return db.getAllAsync<SubstanceListRow>(sql, params);
+  return db.getAllAsync<SubstanceListRow>(sql, [...selectParams, ...whereParams, limit]);
 }
 
 export async function getSubstanceDetails(id: number): Promise<SubstanceDetails | null> {

@@ -21,4 +21,7 @@ for (const t of tables) {
   const out = execSync(`sqlite3 "${OUT}" "SELECT COUNT(*) FROM ${t}"`).toString().trim();
   console.log(`  ${t.padEnd(16)} ${out}`);
 }
+
+execSync(`node ${import.meta.dirname}/add-substance-lower.mjs "${OUT}"`, { stdio: 'inherit' });
+
 console.log(`\nWrote ${OUT}`);
